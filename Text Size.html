@@ -1,0 +1,194 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: white;
+            padding: 20px 30px;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            padding: 12px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            color: white;
+            background: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .message {
+            font-size: 1.4em;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .success {
+            color: #28a745;
+        }
+        .info {
+            color: #007bff;
+        }
+        .separator {
+            margin: 20px auto;
+            height: 1px;
+            width: 80%;
+            background-color: #ddd;
+        }
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff4081;
+            animation: fall 3s linear infinite;
+        }
+        .confetti-piece:nth-child(2n) { background: #4caf50; }
+        .confetti-piece:nth-child(3n) { background: #ffeb3b; }
+        .confetti-piece:nth-child(4n) { background: #2196f3; }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(800px) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Number Guessing Game 🎲</h1>
+        <p>I have selected a number between 1 and 1000. Can you guess it?</p>
+        <div class="separator"></div>
+        <div id="game">
+            <input type="number" id="guess" placeholder="Enter your guess" />
+            <button onclick="checkGuess()">Submit Guess</button>
+            <p class="message" id="message"></p>
+            <div id="result" style="display: none;">
+                <p class="message success"></p>
+                <button onclick="startGame()">Play Again</button>
+            </div>
+        </div>
+        <div class="confetti" id="confetti"></div>
+    </div>
+
+    <!-- Add audio element for the congratulation sound -->
+    <audio id="congrats-sound" src="https://www.soundjay.com/button/sounds/button-4.mp3"></audio>
+
+    <script>
+        let randomNumber;
+        let attempts;
+
+        // Start a new game
+        function startGame() {
+            randomNumber = Math.floor(Math.random() * 1000) + 1;
+            attempts = 0;
+            document.getElementById('message').innerText = '';
+            document.getElementById('guess').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            clearConfetti();
+        }
+
+        // Check the user's guess
+        function checkGuess() {
+            const userGuess = parseInt(document.getElementById('guess').value);
+            attempts++;
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 1000) {
+                document.getElementById('message').innerText = "Please enter a number between 1 and 1000.";
+                document.getElementById('message').className = "message info";
+                return;
+            }
+
+            if (userGuess > randomNumber) {
+                document.getElementById('message').innerText = "📉 Too high! Try again.";
+                document.getElementById('message').className = "message info";
+            } else if (userGuess < randomNumber) {
+                document.getElementById('message').innerText = "📈 Too low! Try again.";
+                document.getElementById('message').className = "message info";
+            } else {
+                document.getElementById('game').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').querySelector('.message').innerText =
+                    `🎉 Congratulations! You guessed the number ${randomNumber} in ${attempts} attempts!`;
+                triggerConfetti();
+                playCongratsSound();
+            }
+        }
+
+        // Trigger confetti animation
+        function triggerConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        // Play congratulation sound
+        function playCongratsSound() {
+            const audio = document.getElementById('congrats-sound');
+            audio.play();
+        }
+
+        // Clear confetti
+        function clearConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            confettiContainer.innerHTML = '';
+        }
+
+        // Initialize the game on page load
+        startGame();
+    </script>
+</body>
+</html>

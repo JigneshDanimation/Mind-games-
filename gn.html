@@ -1,0 +1,210 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>मन पढ़ने वाला खेल</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+      color: white;
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+      background-size: 400% 400%;
+      animation: gradientAnimation 10s infinite;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      padding: 15px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px;
+      border: none;
+      border-radius: 50px;
+      color: white;
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      background-size: 200% 200%;
+      animation: buttonGradient 4s infinite;
+      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(255, 105, 180, 0.8);
+    }
+
+    #languageBtn, #descriptionBtn {
+      margin-top: 20px;
+    }
+
+    #description {
+      margin-top: 20px;
+      font-size: 18px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    @keyframes gradientAnimation {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes buttonGradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="gameTitle">मन पढ़ने वाला खेल</h1>
+  <p id="gameInstruction">1 से 100 के बीच एक संख्या सोचें, और मैं उसे पहचानने की कोशिश करूंगा!</p>
+  <div id="questionContainer">
+    <p id="question">क्या आपकी संख्या 50 से बड़ी है?</p>
+    <button class="button" id="yesBtn">हाँ</button>
+    <button class="button" id="noBtn">नहीं</button>
+    <button class="button" id="confirmBtn" onclick="confirmNumber()">यही संख्या है!</button>
+    <button class="button" id="restartBtn" onclick="restartGame()">खेल दोबारा शुरू करें</button>
+  </div>
+
+  <button id="languageBtn" class="button" onclick="toggleLanguage()">🌐 भाषा बदलें</button>
+  <button id="descriptionBtn" class="button" onclick="showDescription()">विवरण</button>
+
+  <p id="description"></p>
+
+  <script>
+    let lowerBound = 1;
+    let upperBound = 100;
+    let guess = 50;
+    let language = "hindi";
+
+    const textContent = {
+      hindi: {
+        title: "मन पढ़ने वाला खेल",
+        instruction: "1 से 100 के बीच एक संख्या सोचें, और मैं उसे पहचानने की कोशिश करूंगा!",
+        question: (guess) => `क्या आपकी संख्या ${guess} से बड़ी है?`,
+        yes: "हाँ",
+        no: "नहीं",
+        confirm: "यही संख्या है!",
+        restart: "खेल दोबारा शुरू करें",
+        correct: (guess) => `बहुत बढ़िया! आपकी संख्या ${guess} है।`,
+        final: (guess) => `आपकी संख्या ${guess} है!`,
+      },
+      english: {
+        title: "Mind Reading Game",
+        instruction: "Think of a number between 1 and 100, and I will try to guess it!",
+        question: (guess) => `Is your number greater than ${guess}?`,
+        yes: "Yes",
+        no: "No",
+        confirm: "This is the number!",
+        restart: "Restart Game",
+        correct: (guess) => `Great! Your number is ${guess}.`,
+        final: (guess) => `Your number is ${guess}!`,
+      },
+    };
+
+    function updateQuestion() {
+      document.getElementById('question').innerText = textContent[language].question(guess);
+      document.getElementById('yesBtn').innerText = textContent[language].yes;
+      document.getElementById('noBtn').innerText = textContent[language].no;
+      document.getElementById('confirmBtn').innerText = textContent[language].confirm;
+      document.getElementById('restartBtn').innerText = textContent[language].restart;
+
+      document.getElementById('yesBtn').style.display = 'inline-block';
+      document.getElementById('noBtn').style.display = 'inline-block';
+      document.getElementById('confirmBtn').style.display = 'inline-block';
+      document.getElementById('restartBtn').style.display = 'inline-block';
+    }
+
+    function restartGame() {
+      lowerBound = 1;
+      upperBound = 100;
+      guess = 50;
+
+      document.getElementById('question').innerText = textContent[language].question(guess);
+      document.getElementById('description').style.display = 'none';
+
+      updateQuestion();
+    }
+
+    function makeGuess(isYes) {
+      if (isYes) {
+        lowerBound = guess + 1;
+      } else {
+        upperBound = guess - 1;
+      }
+
+      if (lowerBound > upperBound) {
+        document.getElementById('question').innerText = textContent[language].final(guess);
+        hideButtons();
+        return;
+      }
+
+      guess = Math.floor((lowerBound + upperBound) / 2);
+      updateQuestion();
+    }
+
+    function confirmNumber() {
+      document.getElementById('question').innerText = textContent[language].correct(guess);
+      hideButtons();
+    }
+
+    function hideButtons() {
+      document.getElementById('yesBtn').style.display = 'none';
+      document.getElementById('noBtn').style.display = 'none';
+      document.getElementById('confirmBtn').style.display = 'none';
+    }
+
+    function toggleLanguage() {
+      language = language === "hindi" ? "english" : "hindi";
+      document.getElementById('gameTitle').innerText = textContent[language].title;
+      document.getElementById('gameInstruction').innerText = textContent[language].instruction;
+      updateQuestion();
+    }
+
+    function showDescription() {
+      const descriptionEl = document.getElementById('description');
+      const descriptionBtn = document.getElementById('descriptionBtn');
+      descriptionEl.style.display = 'block';
+      descriptionEl.innerText = textContent[language].instruction;
+      descriptionBtn.style.display = 'none';
+
+      setTimeout(() => {
+        descriptionEl.style.display = 'none';
+        descriptionBtn.style.display = 'inline-block';
+      }, 3000);
+    }
+
+    document.getElementById('yesBtn').onclick = function () {
+      makeGuess(true);
+    };
+
+    document.getElementById('noBtn').onclick = function () {
+      makeGuess(false);
+    };
+
+    restartGame();
+  </script>
+</body>
+</html>
